@@ -1,0 +1,40 @@
+generator client {
+  provider = "prisma-client-js"
+  output = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id       Int    @id @default(autoincrement())
+  username String @unique
+  fullname String
+  password String
+}
+
+model Resident {
+  id          Int      @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  name        String
+  address     String?
+  phone       String?
+  age         Int?
+  gender      String?
+  description String?
+  active      Boolean  @default(false)
+  firstRoad   String?
+  secondRoad  String?
+}
+
+model Payment {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  dueDate   DateTime
+  type      String
+  amount    String
+}
