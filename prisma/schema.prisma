@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client-js"
-  output = "../node_modules/.prisma/client"
+  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -16,25 +16,29 @@ model User {
 }
 
 model Resident {
-  id          Int      @id @default(autoincrement())
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id          Int       @id @default(autoincrement())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   name        String
   address     String?
   phone       String?
   age         Int?
   gender      String?
   description String?
-  active      Boolean  @default(false)
   firstRoad   String?
   secondRoad  String?
+  active      Boolean   @default(true)
+  payments    Payment[]
 }
 
 model Payment {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  dueDate   DateTime
-  type      String
-  amount    String
+  id         Int      @id @default(autoincrement())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  dueDate    DateTime
+  type       String
+  amount     Int
+  person     String
+  residentId Int
+  resident   Resident @relation(fields: [residentId], references: [id])
 }

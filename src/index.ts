@@ -43,6 +43,105 @@ app.get(`/`, async (req, res) => {
   res.json("Hi")
 })
 
+// Resident
+
+app.get(`/resident`, async (req, res) => {
+  try {
+    const result = await prisma.resident.findMany()
+    res.json(result)
+  } catch(error) {
+    res.status(404).json(error)
+  }
+})
+
+app.post('/resident', async (req, res) => {
+  const { name, address, phone, age, gender, description, firstRoad, secondRoad } = req.body
+
+  try {
+    const result = await prisma.resident.create({
+      data: {
+        name,
+        address,
+        phone,
+        age,
+        gender,
+        description,
+        firstRoad,
+        secondRoad,
+      },
+    })
+
+    res.json(result)
+  } catch (error) {
+    res.status(404).json(error)
+  }
+})
+
+app.patch('/resident/:id', async (req, res) => {
+  const { id } = req.params
+  const { name, address, phone, age, gender, description, firstRoad, secondRoad } = req.body
+
+  try {
+    const result = await prisma.resident.update({
+      where: {
+        id: +id,
+      },
+      data: {
+        name,
+        address,
+        phone,
+        age,
+        gender,
+        description,
+        firstRoad,
+        secondRoad,
+      },
+    })
+
+    res.json(result)
+  } catch (error) {
+    res.status(404).json(error)
+  }
+})
+
+
+// Payment
+
+app.post('/payment', async (req, res) => {
+  const { dueDate, type, amount, person, residentId } = req.body
+
+  try {
+    const result = await prisma.payment.create({
+      data: {
+        dueDate, 
+        type, 
+        amount, 
+        person,
+        resident: {
+          connect: {
+            id: residentId
+          }
+        }
+      },
+    })
+    console.log('Result payment', result)
+
+    res.json(result)
+  } catch (error) {
+    console.log("🚀 ~ error", error)
+    res.status(404).json("Something went wrong")
+  }
+})
+
+app.get(`/payment`, async (req, res) => {
+  try {
+    const result = await prisma.payment.findMany()
+    res.json(result)
+  } catch (error) {
+    res.status(404).json(error)
+  }
+})
+
 /*
 app.post(`/post`, async (req, res) => {
   const { title, content, authorEmail } = req.body
@@ -168,5 +267,4 @@ app.post(`/post`, async (req, res) => {
 const server = app.listen(3000, () =>
   console.log(`
 🚀 Server ready at: http://localhost:3000
-⭐️ See sample requests: http://pris.ly/e/ts/rest-express#3-using-the-rest-api`),
-)
+`))
