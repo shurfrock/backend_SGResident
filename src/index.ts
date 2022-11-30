@@ -11,31 +11,40 @@ app.use(cors())
 app.post(`/signup`, async (req, res) => {
   const { username, fullname, password } = req.body
 
-  const result = await prisma.user.create({
-    data: {
-      username: (username as string).toLowerCase(),
-      fullname,
-      password
-    },
-  })
-  res.json(result)
+  try {
+    const result = await prisma.user.create({
+      data: {
+        username: (username as string).toLowerCase(),
+        fullname,
+        password
+      },
+    })
+
+    res.json(result)
+  } catch (error) {
+    res.status(404).json(error)
+  }
 })
 
 app.post(`/login`, async (req, res) => {
   const { username, password } = req.body
 
-  const user = await prisma.user.findUnique({
-    where: {
-      username
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        username
+      }
+    })
+  
+    if (!user || user.password !== password) {
+      res.status(404).json(false)
+      return
     }
-  })
-
-  if (!user || user.password !== password) {
-    res.status(404).json(false)
-    return
+  
+    res.json(true)
+  } catch (error) {
+    res.status(404).json(error)
   }
-
-  res.json(true)
 })
 
 
@@ -47,7 +56,11 @@ app.get(`/`, async (req, res) => {
 
 app.get(`/resident`, async (req, res) => {
   try {
-    const result = await prisma.resident.findMany()
+    const result = await prisma.resident.findMany({
+      where: {
+        active: true,
+      }
+    })
     res.json(result)
   } catch(error) {
     res.status(404).json(error)
@@ -115,7 +128,7 @@ app.post('/payment', async (req, res) => {
       data: {
         dueDate, 
         type, 
-        amount, 
+        amount: Number(amount), 
         person,
         resident: {
           connect: {
@@ -141,6 +154,32 @@ app.get(`/payment`, async (req, res) => {
     res.status(404).json(error)
   }
 })
+
+app.patch('/payment/:id', async (req, res) => {
+  const { id } = req.params
+  const { dueDate, type, amount, person } = req.body
+
+  try {
+    const result = await prisma.payment.update({
+      where: {
+        id: +id
+      },
+      data: {
+        dueDate, 
+        type, 
+        amount: amount && Number(amount), 
+        person,
+      },
+    })
+    console.log('Result payment', result)
+
+    res.json(result)
+  } catch (error) {
+    console.log("🚀 ~ error", error)
+    res.status(404).json("Something went wrong")
+  }
+})
+
 
 /*
 app.post(`/post`, async (req, res) => {
