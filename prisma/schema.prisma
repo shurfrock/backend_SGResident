@@ -35,7 +35,6 @@ model Payment {
   id         Int      @id @default(autoincrement())
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-  dueDate    DateTime
   type       String
   amount     Int
   person     String

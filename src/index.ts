@@ -117,16 +117,34 @@ app.patch('/resident/:id', async (req, res) => {
   }
 })
 
+app.delete('/resident/:id', async (req, res) => {
+  const { id } = req.params
+
+  try {
+    const result = await prisma.resident.update({
+      where: {
+        id: +id
+      },
+      data: {
+        active: false
+      }
+    })
+
+    res.json(result)
+  } catch (error) {
+    res.status(404).json(error)
+  }
+})
+
 
 // Payment
 
 app.post('/payment', async (req, res) => {
-  const { dueDate, type, amount, person, residentId } = req.body
+  const { type, amount, person, residentId } = req.body
 
   try {
     const result = await prisma.payment.create({
       data: {
-        dueDate, 
         type, 
         amount: Number(amount), 
         person,
@@ -137,18 +155,20 @@ app.post('/payment', async (req, res) => {
         }
       },
     })
-    console.log('Result payment', result)
 
     res.json(result)
   } catch (error) {
-    console.log("🚀 ~ error", error)
     res.status(404).json("Something went wrong")
   }
 })
 
 app.get(`/payment`, async (req, res) => {
   try {
-    const result = await prisma.payment.findMany()
+    const result = await prisma.payment.findMany({
+      include: {
+        resident: true
+      }
+    })
     res.json(result)
   } catch (error) {
     res.status(404).json(error)
@@ -157,7 +177,7 @@ app.get(`/payment`, async (req, res) => {
 
 app.patch('/payment/:id', async (req, res) => {
   const { id } = req.params
-  const { dueDate, type, amount, person } = req.body
+  const {type, amount, person } = req.body
 
   try {
     const result = await prisma.payment.update({
@@ -165,18 +185,31 @@ app.patch('/payment/:id', async (req, res) => {
         id: +id
       },
       data: {
-        dueDate, 
         type, 
         amount: amount && Number(amount), 
         person,
       },
     })
-    console.log('Result payment', result)
 
     res.json(result)
   } catch (error) {
-    console.log("🚀 ~ error", error)
-    res.status(404).json("Something went wrong")
+    res.status(404).json(error)
+  }
+})
+
+app.delete('/payment/:id', async (req, res) => {
+  const { id } = req.params
+
+  try {
+    const result = await prisma.payment.delete({
+      where: {
+        id: +id
+      }
+    })
+
+    res.json(result)
+  } catch (error) {
+    res.status(404).json(error)
   }
 })
 
